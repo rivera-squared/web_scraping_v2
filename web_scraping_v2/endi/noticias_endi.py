@@ -20,7 +20,7 @@ def get_autor(enlace):
     sel=Selector(text=requests.get(enlace).content)
     autor = ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/a/text()').extract())
     
-    # Los artículos que son solo video no listaran autor alguno
+    # Los articulos que son solo video no listaran autor alguno
     if autor == '':
     	# Sin embargo, hay articulos que no contienen video pero el comando en "autor" no funciona. Lo mas probable haya sido 
     	# haya un error de la persona a cargo del website. El control flow de abajo ayuda a obtener el nombre del autor
@@ -37,7 +37,7 @@ def get_fecha(enlace):
     sel=Selector(text=requests.get(enlace).content)
     fecha = ''.join(sel.xpath('//div[@class="toolbar-item item-date"]/p/text()').extract())
     
-    # De la manera que esta diseñada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
+    # De la manera que esta disenada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
     # El control flow de abajo ayuda a obtener la fecha aun si el articulo es solo un video.
 
     if fecha == '':
@@ -139,7 +139,7 @@ def get_endi():
 
 before = datetime.now()
 current_time = before.strftime("%H:%M:%S")
-print("Hora que comenzó a correr el algoritmo: {}".format(current_time))
+print("Hora que comenzo a correr el algoritmo: {}".format(current_time))
 
 noticias=pd.read_csv('noticias_endi.csv')
 noticias['fecha']= pd.to_datetime(noticias['fecha'])
@@ -154,7 +154,7 @@ despues = len(noticias)
 
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
-print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
+print("Hora que termino de correr el algoritmo: {}".format(current_time1))
 print("\nComenzo con {} articulos.".format(antes))
 print("Termino con {} articulos.".format(despues))
-print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))
+print("{} Articulos anadidos luego de correr el algoritmo.".format(despues-antes))
