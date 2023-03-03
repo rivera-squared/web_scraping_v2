@@ -2,6 +2,7 @@ from scrapy import Selector
 import requests
 import pandas as pd
 from datetime import datetime
+import numpy as np
 import re
 
 def get_complete_link(enlace):
@@ -59,12 +60,12 @@ def clean_fecha1(fecha):
     if fecha != 'No fecha':
         return pd.to_datetime(fecha, dayfirst=True)
     else:
-        return "No fecha"              
+        return np.nan              
 
 def get_categoria(enlace):
-    x=re.sub('(https://www.elvocero.com/gobierno)','',enlace)
+    x=re.sub('(https://www.elvocero.com/gobierno/)','',enlace)
     y=re.sub('/\S+','',x)
-    return y.title()         
+    return y.title()     
 
 def get_noticias_vocero():
     
