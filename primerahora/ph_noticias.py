@@ -89,8 +89,8 @@ def get_noticias_ph():
         date = sel.xpath('//div[@class="ListItemTeaser__date"]/text()').extract()
         link_extension = sel.xpath('//div[@class="ListItemTeaser__column"]/a/@href').extract()
         primerahora_dict = {'fecha':date,
-	                        'titulo':title,
-	                        'enlace':link_extension}
+                            'titulo':title,
+                            'enlace':link_extension}
         primerahora_df = pd.DataFrame(primerahora_dict)
         primerahora_new.append(primerahora_df)
         noticias = pd.concat(primerahora_new)
@@ -101,7 +101,7 @@ def get_noticias_ph():
         autor = []
         categoria=[]
         for link in noticias['enlace']:
-	        
+            
             autor.append(get_autor(link))
             categoria.append(get_categoria(link))
             
@@ -117,7 +117,7 @@ print("Hora que comenzó a correr el algoritmo: {}".format(current_time))
 
 noticias=pd.read_csv('ph_noticias.csv')
 antes = len(noticias)
-
+print("\nComenzo con {} articulos.".format(antes))
 noticias_new=get_noticias_ph()
 noticias = pd.concat([noticias_new, noticias])
 noticias=noticias.drop_duplicates(subset='enlace')
@@ -129,6 +129,6 @@ noticias.to_csv('ph_noticias.csv',index=False)
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
 print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
-print("\nComenzo con {} articulos.".format(antes))
+
 print("Termino con {} articulos.".format(despues))
 print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))

@@ -83,8 +83,8 @@ def get_deportes_ph():
         date = sel.xpath('//div[@class="ListItemTeaser__date"]/text()').extract()
         link_extension = sel.xpath('//div[@class="ListItemTeaser__column"]/a/@href').extract()
         primerahora_dict = {'fecha':date,
-	                        'titulo':title,
-	                        'enlace':link_extension}
+                            'titulo':title,
+                            'enlace':link_extension}
         primerahora_df = pd.DataFrame(primerahora_dict)
         primerahora_new.append(primerahora_df)
         deportes = pd.concat(primerahora_new)
@@ -93,7 +93,7 @@ def get_deportes_ph():
         deportes['fecha']=pd.to_datetime(deportes['fecha'], dayfirst=True)
         autor = []
         for link in deportes['enlace']:
-	        autor.append(get_autor(link))
+            autor.append(get_autor(link))
         deportes['autor'] = autor
         deportes=deportes.drop_duplicates(subset = 'enlace')
     return deportes
@@ -104,7 +104,7 @@ print("Hora que comenzó a correr el algoritmo: {}".format(current_time))
 
 deportes=pd.read_csv('ph_deportes.csv')
 antes = len(deportes)
-
+print("\nComenzo con {} articulos.".format(antes))
 deportes_new=get_deportes_ph()
 deportes = pd.concat([deportes_new, deportes])
 deportes=deportes.drop_duplicates(subset='enlace')
@@ -114,4 +114,5 @@ deportes.to_csv('ph_deportes.csv',index=False)
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
 print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
+print("Termino con {} articulos.".format(despues)
 print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))
