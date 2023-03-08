@@ -115,6 +115,20 @@ current_time = before.strftime("%H:%M:%S")
 print("Hora que comenzo a correr el algoritmo: {}".format(current_time))
 
 metro_noticias = pd.read_csv('metro_noticias.csv')
+metro_noticias['fecha'] = pd.to_datetime(metro_noticias['fecha'])
+antes = len(metro_noticias)
+print("\nComenzo con {} articulos.".format(antes))
+
 metro_noticias_new = get_metro_noticias()
+metro_noticias = pd.concat([metro_noticias_new, metro_noticias])
+metro_noticias = metro_noticias.drop_duplicates(subset = 'enlace')
+despues = len(metro_noticias)
 
 metro_noticias.to_csv('metro_noticias.csv', index=False)
+
+now = datetime.now()
+current_time1 = now.strftime("%H:%M:%S")
+print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
+
+print("Termino con {} articulos.".format(despues))
+print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))
