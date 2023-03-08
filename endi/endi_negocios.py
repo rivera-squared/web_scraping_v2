@@ -17,15 +17,15 @@ def get_complete_link(link):
     return complete_link
 
 def get_autor(enlace):
-	
+    
     sel=Selector(text=requests.get(enlace).content)
     autor = ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/a/text()').extract())
     
     # Los artículos que son solo video no listaran autor alguno
     if autor == '':
-    	# Sin embargo, hay articulos que no contienen video pero el comando en "autor" no funciona. Lo mas probable haya sido 
-    	# haya un error de la persona a cargo del website. El control flow de abajo ayuda a obtener el nombre del autor
-    	# si la palabra 'videos' no se encuentra dentro del enlace
+        # Sin embargo, hay articulos que no contienen video pero el comando en "autor" no funciona. Lo mas probable haya sido 
+        # haya un error de la persona a cargo del website. El control flow de abajo ayuda a obtener el nombre del autor
+        # si la palabra 'videos' no se encuentra dentro del enlace
 
         if (bool(re.search('(videos)', enlace))) == False: 
             return ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/text()').extract())
@@ -34,7 +34,7 @@ def get_autor(enlace):
         return autor
     
 def get_fecha(enlace):
-	
+    
     sel=Selector(text=requests.get(enlace).content)
     fecha = ''.join(sel.xpath('//div[@class="toolbar-item item-date"]/p/text()').extract())
     
@@ -83,7 +83,7 @@ def fix_date(date):
         return date.replace('diciembre','dec')   
 
 def clean_fecha(fecha):
-	
+    
     x=re.sub('\w+\,', '', str(fecha)).strip()
     y=re.sub('(de)', '/',x).strip()
     z=fix_date(y)
