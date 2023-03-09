@@ -52,7 +52,8 @@ def get_noticel():
     noticel['categoria'] = categoria
     
     noticel = noticel[['fecha','titulo','autor','categoria','enlace']]
-           
+    noticel = noticel.sort_values(by='fecha', ascending = False)
+
     return noticel
     
 before = datetime.now()
@@ -62,7 +63,7 @@ print("Hora que comenzó a correr el algoritmo: {}".format(current_time))
 noticel = pd.read_csv('noticel.csv')
 noticel['fecha'] = pd.to_datetime(noticel['fecha'])
 antes = len(noticel)
-
+print("\nComenzo con {} articulos.".format(antes))
 noticel_new=get_noticel()
 noticel = pd.concat([noticel_new, noticel])
 noticel = noticel.drop_duplicates(subset = 'enlace')
@@ -73,6 +74,6 @@ noticel.to_csv('noticel.csv', index=False)
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
 print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
-print("\nComenzo con {} articulos.".format(antes))
+
 print("Termino con {} articulos.".format(despues))
 print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))
