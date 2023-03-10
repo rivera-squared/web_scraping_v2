@@ -1,6 +1,8 @@
 from scrapy import Selector
 import requests
 import pandas as pd
+from datetime import datetime
+import re
 
 def get_title(enlace):
     # enlace = 'https://www.metro.pr/noticias/locales/'
@@ -100,12 +102,12 @@ def get_metro_noticias():
         })
     
     metro_noticias['enlace']=metro_noticias['enlace'].apply(get_complete_link)
-    metro_noticias['autor']=metro_noticias['enlace'].apply(get_autor)
+    metro_noticias['autor(a)']=metro_noticias['enlace'].apply(get_autor)
     metro_noticias['fecha']=metro_noticias['enlace'].apply(get_fecha)
     metro_noticias['fecha']=metro_noticias['fecha'].apply(clean_fecha)
-    # metro_noticias['categoria']=metro_noticias['enlace'].apply(get_categoria)
+    metro_noticias['categoria']= "Noticias"
     
-    metro_noticias = metro_noticias[['fecha','titulo','autor','enlace']]
+    metro_noticias = metro_noticias[['fecha','titulo','autor(a)', 'categoria','enlace']]
     metro_noticias = metro_noticias.sort_values(by='fecha', ascending = False)
 
     return metro_noticias
@@ -116,6 +118,7 @@ print("Hora que comenzo a correr el algoritmo: {}".format(current_time))
 
 metro_noticias = pd.read_csv('metro_noticias.csv')
 metro_noticias['fecha'] = pd.to_datetime(metro_noticias['fecha'])
+metro_noticias = metro_noticias.sort_values(by='fecha', ascending = False)
 antes = len(metro_noticias)
 print("\nComenzo con {} articulos.".format(antes))
 
