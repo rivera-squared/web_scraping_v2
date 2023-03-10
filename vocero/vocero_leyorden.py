@@ -10,7 +10,7 @@ def get_complete_link(enlace):
     return vocero + enlace
 
 def get_title1():
-    enlace = 'https://www.elvocero.com/gobierno/'
+    enlace = 'https://www.elvocero.com/ley-y-orden/'
     sel=Selector(text=requests.get(enlace).content)
     titles = sel.xpath('//h2[@class="tnt-headline "]/a/text()').extract()
     title_clean = []
@@ -19,7 +19,7 @@ def get_title1():
     return title_clean
 
 def get_title2():
-    enlace = 'https://www.elvocero.com/gobierno/'
+    enlace = 'https://www.elvocero.com/ley-y-orden/'
     sel=Selector(text=requests.get(enlace).content)
     titles = sel.xpath('//h3[@class="tnt-headline "]/a/text()').extract()
     title_clean = []
@@ -28,7 +28,7 @@ def get_title2():
     return title_clean
         
 def get_enlace1():
-    enlace = 'https://www.elvocero.com/gobierno/'
+    enlace = 'https://www.elvocero.com/ley-y-orden/'
     sel=Selector(text=requests.get(enlace).content)
     enlaces = sel.xpath('//h2[@class="tnt-headline "]/a/@href').extract()
     enlace_completo = []
@@ -37,7 +37,7 @@ def get_enlace1():
     return enlace_completo
 
 def get_enlace2():
-    enlace = 'https://www.elvocero.com/gobierno/'
+    enlace = 'https://www.elvocero.com/ley-y-orden/'
     sel=Selector(text=requests.get(enlace).content)
     enlaces = sel.xpath('//h3[@class="tnt-headline "]/a/@href').extract()
     enlace_completo = []
@@ -69,7 +69,7 @@ def clean_autor(autor):
     return z
 
 def get_autor(enlace):
-    # enlace = 'https://www.elvocero.com/gobierno/fortaleza/gobernador-llega-a-bayam-n-para-reuni-n-con-la-federaci-n-de-alcaldes/article_761c9616-b774-11ed-b67e-7f8e07bfc2c7.html'
+    # enlace = 'https://www.elvocero.com/ley-y-orden/fortaleza/gobernador-llega-a-bayam-n-para-reuni-n-con-la-federaci-n-de-alcaldes/article_761c9616-b774-11ed-b67e-7f8e07bfc2c7.html'
     sel=Selector(text=requests.get(enlace).content)
     autor = ''.join(sel.xpath('//ul[@class="list-inline"]/li/span/a/text()').extract())
     
@@ -82,44 +82,44 @@ def get_autor(enlace):
 
 
 # Seccion principal
-def get_vocero_gobierno1():
+def get_vocero_ley1():
     titulo1 = get_title1()
     enlace1 = get_enlace1()
-    vocero_gobierno = pd.DataFrame({
+    vocero_ley = pd.DataFrame({
         'titulo':titulo1,
         'enlace':enlace1,
-        'categoria': "Gobierno"
+        'categoria': "Ley y Orden"
         })
-    vocero_gobierno['fecha'] = vocero_gobierno['enlace'].apply(get_fecha)
-    vocero_gobierno['autor(a)'] = vocero_gobierno['enlace'].apply(get_autor)
-    vocero_gobierno = vocero_gobierno[['fecha','titulo','autor(a)','categoria','enlace']]
-    vocero_gobierno = vocero_gobierno.sort_values(by='fecha', ascending = False)
+    vocero_ley['fecha'] = vocero_ley['enlace'].apply(get_fecha)
+    vocero_ley['autor(a)'] = vocero_ley['enlace'].apply(get_autor)
+    vocero_ley = vocero_ley[['fecha','titulo','autor(a)','categoria','enlace']]
+    vocero_ley = vocero_ley.sort_values(by='fecha', ascending = False)
     
-    return vocero_gobierno
+    return vocero_ley
 
 # Seccion secundaria
-def get_vocero_gobierno2():
+def get_vocero_ley2():
     
     titulo2 = get_title2()
     enlace2 = get_enlace2()
-    vocero_gobierno = pd.DataFrame({
+    vocero_ley = pd.DataFrame({
         'titulo':titulo2,
         'enlace':enlace2,
-        'categoria': "Gobierno"
+        'categoria': "Ley y Orden"
         })
-    vocero_gobierno['fecha'] = vocero_gobierno['enlace'].apply(get_fecha)
-    vocero_gobierno['autor(a)'] = vocero_gobierno['enlace'].apply(get_autor)
-    vocero_gobierno = vocero_gobierno[['fecha','titulo','autor(a)','categoria','enlace']]
-    vocero_gobierno = vocero_gobierno.sort_values(by='fecha', ascending = False)
+    vocero_ley['fecha'] = vocero_ley['enlace'].apply(get_fecha)
+    vocero_ley['autor(a)'] = vocero_ley['enlace'].apply(get_autor)
+    vocero_ley = vocero_ley[['fecha','titulo','autor(a)','categoria','enlace']]
+    vocero_ley = vocero_ley.sort_values(by='fecha', ascending = False)
     
-    return vocero_gobierno
+    return vocero_ley
 
-def vocero_gobierno():
-    vocero_gobierno_principal = get_vocero_gobierno1()
-    vocero_gobierno_secundario = get_vocero_gobierno2()
-    vocero_gobierno = pd.concat([vocero_gobierno_principal, vocero_gobierno_secundario])
-    vocero_gobierno = vocero_gobierno.sort_values(by = 'fecha', ascending = False)
-    return vocero_gobierno
+def vocero_ley():
+    vocero_ley_principal = get_vocero_ley1()
+    vocero_ley_secundario = get_vocero_ley2()
+    vocero_ley = pd.concat([vocero_ley_principal, vocero_ley_secundario])
+    vocero_ley = vocero_ley.sort_values(by = 'fecha', ascending = False)
+    return vocero_ley
 
 # =============================================================================
 # Aplicar algoritmos
@@ -128,18 +128,18 @@ before = datetime.now()
 current_time = before.strftime("%H:%M:%S")
 print("\nHora que comenzo a correr el algoritmo: {}".format(current_time))
       
-gobierno = pd.read_csv('vocero_gobierno.csv')
+ley = pd.read_csv('vocero_leyorden.csv')
 
-antes=len(gobierno)    
+antes=len(ley)    
 print("Comenzo con {} articulos.".format(antes))
 
-gobierno_new = vocero_gobierno()
-gobierno = pd.concat([gobierno_new, gobierno])
-gobierno = gobierno.drop_duplicates(subset='enlace')
-gobierno['fecha'] = pd.to_datetime(gobierno['fecha'])
-gobierno = gobierno.sort_values(by = 'fecha', ascending = False)
-gobierno.to_csv('vocero_gobierno.csv',index=False)
-despues = len(gobierno)
+ley_new = vocero_ley()
+ley = pd.concat([ley_new, ley])
+ley = ley.drop_duplicates(subset='enlace')
+ley['fecha'] = pd.to_datetime(ley['fecha'])
+ley = ley.sort_values(by = 'fecha', ascending = False)
+ley.to_csv('vocero_leyorden.csv',index=False)
+despues = len(ley)
 
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
