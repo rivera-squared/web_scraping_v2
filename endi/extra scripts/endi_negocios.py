@@ -1,4 +1,4 @@
-# Web scraping script para El Nuevo D�a noticias
+# Web scraping script para El Nuevo DÃ­a negocio
 
 from scrapy import Selector
 import requests
@@ -17,10 +17,11 @@ def get_complete_link(link):
     return complete_link
 
 def get_autor(enlace):
+    
     sel=Selector(text=requests.get(enlace).content)
     autor = ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/a/text()').extract())
     
-    # Los articulos que son solo video no listaran autor alguno
+    # Los artículos que son solo video no listaran autor alguno
     if autor == '':
         # Sin embargo, hay articulos que no contienen video pero el comando en "autor" no funciona. Lo mas probable haya sido 
         # haya un error de la persona a cargo del website. El control flow de abajo ayuda a obtener el nombre del autor
@@ -37,7 +38,7 @@ def get_fecha(enlace):
     sel=Selector(text=requests.get(enlace).content)
     fecha = ''.join(sel.xpath('//div[@class="toolbar-item item-date"]/p/text()').extract())
     
-    # De la manera que esta disenada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
+    # De la manera que esta diseñada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
     # El control flow de abajo ayuda a obtener la fecha aun si el articulo es solo un video.
 
     if fecha == '':
@@ -91,22 +92,22 @@ def clean_fecha(fecha):
     return time
 
 def get_categoria(enlace):
-    x=re.sub('(https://www.elnuevodia.com/noticias/)','',enlace)
+    x=re.sub('(https://www.elnuevodia.com/negocios/)','',enlace)
     y=re.sub('/\S+','',x)
     return y.title()
 
-
-
 def get_endi():
+
                         
     endi_new=[]
-    enlaces = ['https://www.elnuevodia.com/noticias/locales/',
-    'https://www.elnuevodia.com/noticias/gobierno/',
-    'https://www.elnuevodia.com/noticias/legislatura/',
-    'https://www.elnuevodia.com/noticias/politica/',
-    'https://www.elnuevodia.com/noticias/seguridad/',
-    'https://www.elnuevodia.com/noticias/tribunales/']
-    
+    enlaces = ['https://www.elnuevodia.com/negocios/consumo/',
+    'https://www.elnuevodia.com/negocios/banca-finanzas/',
+    'https://www.elnuevodia.com/negocios/empresas-comercios/',
+    'https://www.elnuevodia.com/negocios/economia/',
+    'https://www.elnuevodia.com/negocios/construccion/',
+    'https://www.elnuevodia.com/negocios/turismo/',
+    'https://www.elnuevodia.com/negocios/agro/',
+    'https://www.elnuevodia.com/negocios/bienes-raices/']
     
     for enlace in enlaces:
         sel=Selector(text=requests.get(enlace).content)
@@ -116,45 +117,42 @@ def get_endi():
         endi_df = pd.DataFrame(endi_dict)
         endi_new.append(endi_df)
         
-    noticias = pd.concat(endi_new)
-    noticias['enlace']= noticias['enlace'].apply(get_complete_link)
+    negocios = pd.concat(endi_new)
+    negocios['enlace']= negocios['enlace'].apply(get_complete_link)
     
     fecha=[]
     autor=[]
     categoria=[]
-    for enlace in noticias['enlace']:
+    for enlace in negocios['enlace']:
         sel=Selector(text=requests.get(enlace).content)
         autor.append(get_autor(enlace))
         fecha.append(get_fecha(enlace))
         categoria.append(get_categoria(enlace))
     
-    noticias['autor']=autor
-    noticias['fecha']=fecha
-    noticias['fecha']=noticias['fecha'].apply(clean_fecha)
-    noticias['categoria']=categoria
+    negocios['autor']=autor
+    negocios['fecha']=fecha
+    negocios['fecha']=negocios['fecha'].apply(clean_fecha)
+    negocios['categoria']=categoria
+    negocios=negocios.sort_values(by='fecha',ascending=False)
+    negocios=negocios[['fecha','titulo','autor','categoria','enlace']]
     
-    noticias=noticias.sort_values(by='fecha',ascending=False)
-    noticias=noticias[['fecha','titulo','autor','categoria','enlace']]
-    return noticias
+    return negocios
 
 before = datetime.now()
 current_time = before.strftime("%H:%M:%S")
-print("Hora que comenzo a correr el algoritmo: {}".format(current_time))
+print("Hora que comenzó a correr el algoritmo: {}".format(current_time))
 
-noticias=pd.read_csv('endi_noticias.csv')
-noticias['fecha']= pd.to_datetime(noticias['fecha'])
-antes=len(noticias)
+negocios=pd.read_csv('endi_negocios.csv')
+negocios['fecha']=pd.to_datetime(negocios['fecha'])
+antes=len(negocios)
 
-noticias_new = get_endi()
-noticias = pd.concat([noticias_new, noticias])
-noticias=noticias.drop_duplicates(subset='enlace')
-noticias = noticias.sort_values(by='fecha', ascending = False)
-noticias.to_csv('endi_noticias.csv',index=False)
-despues = len(noticias)
+negocios_new = get_endi()
+negocios = pd.concat([negocios_new, negocios])
+negocios=negocios.drop_duplicates(subset='enlace')
+negocios.to_csv('endi_negocios.csv',index=False)
+despues = len(negocios)
 
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
-print("Hora que termino de correr el algoritmo: {}".format(current_time1))
-print("\nComenzo con {} articulos.".format(antes))
-print("Termino con {} articulos.".format(despues))
-print("{} Articulos anadidos luego de correr el algoritmo.".format(despues-antes))
+print("Hora que terminó de correr el algoritmo: {}".format(current_time1))
+print("{} Artículos añadidos luego de correr el algoritmo.".format(despues-antes))

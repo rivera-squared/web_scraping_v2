@@ -1,10 +1,18 @@
-# Web scraping script para El Nuevo D�a noticias
-
 from scrapy import Selector
 import requests
 import pandas as pd
 from datetime import datetime
 import re
+
+def get_title():
+    enlace ='https://www.elnuevodia.com/noticias/mundo/'
+    sel=Selector(text=requests.get(enlace).content)
+    return sel.xpath('//h1[@class="story-tease-title"]/a/text()').extract()
+
+def get_link_extension():
+    enlace ='https://www.elnuevodia.com/noticias/mundo/'
+    sel=Selector(text=requests.get(enlace).content)
+    return sel.xpath('//h1[@class="story-tease-title"]/a/@href').extract()
 
 def get_complete_link(link):
     """
@@ -17,10 +25,11 @@ def get_complete_link(link):
     return complete_link
 
 def get_autor(enlace):
-    sel=Selector(text=requests.get(enlace).content)
-    autor = ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/a/text()').extract())
     
-    # Los articulos que son solo video no listaran autor alguno
+    sel=Selector(text=requests.get(enlace).content)
+    autor = ''.join(sel.xpath('//div[@class="toolbar-item item-author"]/p/span/text()').extract())
+    
+    # Los artículos que son solo video no listaran autor alguno
     if autor == '':
         # Sin embargo, hay articulos que no contienen video pero el comando en "autor" no funciona. Lo mas probable haya sido 
         # haya un error de la persona a cargo del website. El control flow de abajo ayuda a obtener el nombre del autor
@@ -34,10 +43,11 @@ def get_autor(enlace):
     
 def get_fecha(enlace):
     
+    
     sel=Selector(text=requests.get(enlace).content)
     fecha = ''.join(sel.xpath('//div[@class="toolbar-item item-date"]/p/text()').extract())
     
-    # De la manera que esta disenada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
+    # De la manera que esta diseñada la pagina, la sintaxia del comando de "fecha" cambia si el articulo es solo un video.
     # El control flow de abajo ayuda a obtener la fecha aun si el articulo es solo un video.
 
     if fecha == '':
@@ -49,7 +59,7 @@ def get_fecha(enlace):
         else:
             return 'No fecha'
     else:
-        return fecha
+        return fecha   
 
 def fix_date(date):
     """
@@ -85,72 +95,62 @@ def clean_fecha(fecha):
     
     x=re.sub('\w+\,', '', str(fecha)).strip()
     y=re.sub('(de)', '/',x).strip()
-    z=fix_date(y)
-    z=''.join(re.findall("\d+\s/\s\w+\s/\s\d{4}", z))
+    
+    z=''.join(re.findall("\d+\s/\s\w+\s/\s\d{4}", y))
     time=pd.to_datetime(z, dayfirst=True)
     return time
 
 def get_categoria(enlace):
-    x=re.sub('(https://www.elnuevodia.com/noticias/)','',enlace)
+    x=re.sub('(https://www.elnuevodia.com/noticias/estados-unidos/)','',enlace)
     y=re.sub('/\S+','',x)
     return y.title()
 
 
+def get_endi_mundo():
 
-def get_endi():
-                        
-    endi_new=[]
-    enlaces = ['https://www.elnuevodia.com/noticias/locales/',
-    'https://www.elnuevodia.com/noticias/gobierno/',
-    'https://www.elnuevodia.com/noticias/legislatura/',
-    'https://www.elnuevodia.com/noticias/politica/',
-    'https://www.elnuevodia.com/noticias/seguridad/',
-    'https://www.elnuevodia.com/noticias/tribunales/']
+    title = get_title()
+    link_extension = get_link_extension()
     
-    
-    for enlace in enlaces:
-        sel=Selector(text=requests.get(enlace).content)
-        titulo=sel.xpath('//h1[@class="story-tease-title"]/a/text()').extract()
-        link_extension=sel.xpath('//h1[@class="story-tease-title"]/a/@href').extract()
-        endi_dict = {'titulo':titulo, 'enlace':link_extension}
-        endi_df = pd.DataFrame(endi_dict)
-        endi_new.append(endi_df)
+    enlace=[]
+    for link in link_extension:
+        enlace.append(get_complete_link(link))
         
-    noticias = pd.concat(endi_new)
-    noticias['enlace']= noticias['enlace'].apply(get_complete_link)
+    endi_mundo = pd.DataFrame({
+        "titulo":title,
+        "enlace":enlace
+        })    
     
-    fecha=[]
     autor=[]
-    categoria=[]
-    for enlace in noticias['enlace']:
-        sel=Selector(text=requests.get(enlace).content)
-        autor.append(get_autor(enlace))
-        fecha.append(get_fecha(enlace))
-        categoria.append(get_categoria(enlace))
+    for x in endi_mundo['enlace']:
+        autor.append(get_autor(x))
+        
+    fecha=[]
+    for x in endi_mundo['enlace']:
+        fecha.append(get_fecha(x))    
+        
+    endi_mundo['autor']=autor
+    endi_mundo['fecha']=fecha
+    endi_mundo['fecha']= endi_mundo['fecha'].apply(fix_date)
+    endi_mundo['fecha']=endi_mundo['fecha'].apply(clean_fecha)
+    endi_mundo['categoria'] = "Mundo"
+    endi_mundo=endi_mundo.sort_values(by='fecha', ascending = False)
+    endi_mundo = endi_mundo[['fecha','titulo','autor','categoria','enlace']]
     
-    noticias['autor']=autor
-    noticias['fecha']=fecha
-    noticias['fecha']=noticias['fecha'].apply(clean_fecha)
-    noticias['categoria']=categoria
-    
-    noticias=noticias.sort_values(by='fecha',ascending=False)
-    noticias=noticias[['fecha','titulo','autor','categoria','enlace']]
-    return noticias
+    return endi_mundo
 
 before = datetime.now()
 current_time = before.strftime("%H:%M:%S")
 print("Hora que comenzo a correr el algoritmo: {}".format(current_time))
 
-noticias=pd.read_csv('endi_noticias.csv')
-noticias['fecha']= pd.to_datetime(noticias['fecha'])
-antes=len(noticias)
+endi_mundo = pd.read_csv('endi_mundo.csv')
+endi_mundo['fecha'] = pd.to_datetime(endi_mundo['fecha'])
+antes = len(endi_mundo)
 
-noticias_new = get_endi()
-noticias = pd.concat([noticias_new, noticias])
-noticias=noticias.drop_duplicates(subset='enlace')
-noticias = noticias.sort_values(by='fecha', ascending = False)
-noticias.to_csv('endi_noticias.csv',index=False)
-despues = len(noticias)
+endi_mundo_new=get_endi_mundo()
+endi_mundo=pd.concat([endi_mundo_new, endi_mundo])
+endi_mundo=endi_mundo.drop_duplicates(subset='enlace')
+endi_mundo.to_csv('endi_mundo.csv', index=False)
+despues = len(endi_mundo)
 
 now = datetime.now()
 current_time1 = now.strftime("%H:%M:%S")
