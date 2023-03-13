@@ -1,1 +1,3 @@
-El periodico "Presencia" ha sido el unico periodico hasta el momento que tiene una seccion llamada "Femenina"
+El periodico "Presencia" ha sido el unico periodico hasta el momento que tiene una seccion llamada "Femenina" (NO PUEDE HACERSE SCRAPE)
+
+https://www.upr.edu/biblioteca-uprc/periodicos-puertorriquenos/
